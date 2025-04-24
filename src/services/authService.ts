@@ -3,6 +3,7 @@ import { Database } from "../lib/db";
 import { hashPassword, verifyPassword } from "../lib/hash";
 import { createJWT, getDetailsFromToken, isValidToken } from "../lib/jwt";
 import { loginSchema, LoginSchema, registerSchema, RegisterSchema } from "../validators/auth";
+const prisma = Database.getClient();
 
 export const login = async (req: Request, res: Response):Promise<any> => {
   const body: LoginSchema = req.body;
@@ -12,22 +13,18 @@ export const login = async (req: Request, res: Response):Promise<any> => {
     return res.status(400).json({ error: 'Invalid data' });
   }
 
-  const prisma = Database.getClient();
-
   const user = await prisma.user.findUnique({
     where: {
       email: parsedBody.data.email,
     },
   });
 
-  await Database.disconnect();
-
   if (!user || !(await verifyPassword(parsedBody.data.password, user.password))) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  const accessToken = await createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
-  const refreshToken = await createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
+  const accessToken = createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
+  const refreshToken = createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
 
   return res.status(200).json({ accessToken, refreshToken });
 };
@@ -40,8 +37,6 @@ export const register = async (req: Request, res: Response):Promise<any> => {
     return res.status(400).json({ error: 'Invalid data' });
   }
 
-  const prisma = Database.getClient();
-
   const hashedPassword = await hashPassword(parsedBody.data.password);
 
   try {
@@ -53,10 +48,8 @@ export const register = async (req: Request, res: Response):Promise<any> => {
       },
     });
 
-    await Database.disconnect();
-
-    const accessToken = await createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
-    const refreshToken = await createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
+    const accessToken = createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
+    const refreshToken = createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
 
     return res.status(200).json({ message: "User Created successfully", accessToken, refreshToken });
   } catch (err: any) {
@@ -80,15 +73,15 @@ export const refreshToken = async (req: Request, res: Response):Promise<any> => 
     return res.status(401).json({ error: 'Refresh token is required' });
   }
   
-  const tokenDetails = await getDetailsFromToken(oldRefreshToken);
+  const tokenDetails = getDetailsFromToken(oldRefreshToken);
   if (!tokenDetails) {
     return res.status(401).json({ error: 'Invalid refresh token' });
   }
   
   const { userId, emailId } = tokenDetails;
-  if (await isValidToken(oldRefreshToken)) {
-    const newAccessToken = await createJWT(userId!, emailId!, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes
-    const newRefreshToken = await createJWT(userId!, emailId!, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
+  if (isValidToken(oldRefreshToken)) {
+    const newAccessToken = createJWT(userId!, emailId!, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes
+    const newRefreshToken = createJWT(userId!, emailId!, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
     return res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   } else {
     return res.status(401).json({ error: 'Invalid refresh token' });

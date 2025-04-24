@@ -5,7 +5,7 @@ if (!secret) {
   throw new Error("JWT secret is not set in environment variables.");
 }
 
-export const createJWT = async (userId: string, userEmail?: string, expiresIn?: number) => {
+export const createJWT = (userId: string, userEmail?: string, expiresIn?: number) => {
   const payload = {
     userId,
     userEmail
@@ -29,20 +29,27 @@ export const verifyJWT = (token: string) => {
   }
 };
 
-export const getDetailsFromToken = async (
+export const getDetailsFromToken = (
   token: string
-): Promise<{ userId: string; emailId: string } | null> => {
-  const decoded = verifyJWT(token);
-  if (!decoded) {
+) => {
+  try {
+    const decoded = verifyJWT(token);
+    const userId = (decoded as jwt.JwtPayload).userId as string;
+    const emailId = (decoded as jwt.JwtPayload).userEmail as string;
+    return { userId, emailId };
+  } catch (error) {
     return null;
   }
-  const userId = (decoded as jwt.JwtPayload).userId as string;
-  const emailId = (decoded as jwt.JwtPayload).userEmail as string;
-
-  return { userId, emailId };
 };
 
-export const isValidToken = async (token: string): Promise<boolean> => {
-  const decoded = verifyJWT(token);
-  return !!decoded;
+export const isValidToken = (token: string) => {
+  try {
+    const decoded = verifyJWT(token);
+    if (decoded==null) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
