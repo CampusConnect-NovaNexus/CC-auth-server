@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc --skipLibCheck",
-    "dev": "tsx watch src/index.ts",
+    "dev:http": "tsx watch src/index.ts",
+    "dev:grpc": "tsx watch src/grpc.ts",
     "start": "node dist/index.js",
+    "start:grpc": "node dist/grpc.js",
+    "start:all": "concurrently \"npm run start\" \"npm run start:grpc\"",
     "lint": "tsc --noEmit --skipLibCheck",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -31,6 +34,7 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
