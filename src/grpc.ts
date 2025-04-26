@@ -5,6 +5,11 @@ import { login, refreshToken, register, validateToken } from './services/authGrp
 import { ProtoGrpcType } from './proto/a';
 import { AuthServiceHandlers } from './proto/AuthService';
 
+import express from 'express';
+
+const PORT = process.env.PORT || 50051;
+const HTTP_PORT = process.env.HTTP_PORT || 5500;
+
 const packageDefinition = protoLoader.loadSync(path.join(__dirname, '../a.proto'));
 
 const personProto = grpc.loadPackageDefinition(packageDefinition) as unknown as ProtoGrpcType;
@@ -59,7 +64,17 @@ const handlers: AuthServiceHandlers = {
 const server = new grpc.Server();
 
 server.addService((personProto.AuthService).service, handlers);
-server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () => {
+server.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(), () => {
     console.log('Server started, listening on port 50051');
     server.start();
+});
+
+const app = express();
+app.get('/', (req: express.Request, res: express.Response): void => {
+  res.json({
+    message: 'gRPC server is running'
+  });
+});
+app.listen(HTTP_PORT, () => {
+  console.log(`HTTP health check server running on port ${HTTP_PORT}`);
 });
