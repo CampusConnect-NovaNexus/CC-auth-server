@@ -5,6 +5,21 @@ import { createJWT, getDetailsFromToken, isValidToken } from "../lib/jwt";
 import { loginSchema, LoginSchema, registerSchema, RegisterSchema } from "../validators/auth";
 const prisma = Database.getClient();
 
+export const getUserById = async (req: Request, res: Response):Promise<any> => {
+  const userId = req.params.id;
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  return res.status(200).json(user);
+};
+
 export const login = async (req: Request, res: Response):Promise<any> => {
   const body: LoginSchema = req.body;
   const parsedBody = loginSchema.safeParse(body);
