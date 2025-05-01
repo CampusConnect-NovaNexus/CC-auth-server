@@ -26,7 +26,7 @@ export const login = async (req: Request, res: Response):Promise<any> => {
   const accessToken = createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
   const refreshToken = createJWT(user.id, user.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
 
-  return res.status(200).json({ accessToken, refreshToken });
+  return res.status(200).json({ user, accessToken, refreshToken });
 };
 
 export const register = async (req: Request, res: Response):Promise<any> => {
@@ -51,7 +51,7 @@ export const register = async (req: Request, res: Response):Promise<any> => {
     const accessToken = createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 15); // 15 minutes 
     const refreshToken = createJWT(newUser.id, newUser.email, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30); // 30 days
 
-    return res.status(200).json({ message: "User Created successfully", accessToken, refreshToken });
+    return res.status(200).json({ user: newUser, accessToken, refreshToken });
   } catch (err: any) {
     await Database.disconnect();
     if (err.code === 'P2002') {
