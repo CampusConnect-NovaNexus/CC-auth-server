@@ -60,6 +60,7 @@ export const register = async (req: Request, res: Response):Promise<any> => {
         email: parsedBody.data.email,
         password: hashedPassword,
         name: parsedBody.data.name || undefined,
+        roles: parsedBody.data.role ? [parsedBody.data.role as any] : undefined,
       },
     });
 
