@@ -24,6 +24,15 @@ model User {
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
+  
+  aboutMe         String?
+  instaLink       String?
+  githubLink      String?
+  youtubeLink     String?
+  XLink           String?
+  leetcodeLink    String?
+  codeforcesLink  String?
+  contactNo       String?
 
   @@index([verified])
   @@index([createdAt])
