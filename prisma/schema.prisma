@@ -34,8 +34,24 @@ model User {
   codeforcesLink  String?
   contactNo       String?
 
+  devices   Device[] 
+
   @@index([verified])
   @@index([createdAt])
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String
+  expoToken   String   @unique
+  platform    String   
+  lastUsed    DateTime @default(now()) @updatedAt
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([expoToken])
 }
 
 

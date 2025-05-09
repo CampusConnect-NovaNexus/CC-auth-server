@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import authRouter from './routes/authRoutes';
+import notificationRouter from './routes/notificationRoutes';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/notifications', notificationRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
