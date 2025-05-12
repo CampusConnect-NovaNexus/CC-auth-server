@@ -5,15 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: campus-connect-auth
+    env_file:
+      - ./.env
     environment:
       - GRPC_HOST=0.0.0.0
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://auth_owner:npg_OqkPZFRSY86V@ep-frosty-paper-a1ofus82-pooler.ap-southeast-1.aws.neon.tech/auth?sslmode=require
-      - JWT_SECRET=secret_key_for_authentication_service
-      - PORT=3500
-      - GRPC_PORT=50053
-      - RESEND_API_KEY=re_bQavPbdj_Fhnyvze8eWcMLhrsLgV3aC8s
-      - GOOGLE_CLIENT_ID=171839534985-b205gpvt4putto5r7ubfl5r1lp0gaugj.apps.googleusercontent.com
     ports:
       - "3500:3500"
       - "50053:50053"
@@ -31,17 +27,16 @@ services:
       context: ../CC-lost-found-backend
       dockerfile: Dockerfile
     container_name: campus-connect-lostfound
+    env_file:
+      - ../CC-lost-found-backend/.env
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=production
       - GRPC_SERVER=0.0.0.0:50052
-      - JWT_SECRET_KEY=secret_key_for_authentication_service
       - AUTH_GRPC_SERVER=auth-server:50053
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:///lostfound.db
-      - UPLOAD_FOLDER=/app/uploads
     ports:
-      - "6000:6000"
+      - "2000:2000"
       - "50052:50052"
     networks:
       - campus-connect-network
@@ -55,20 +50,16 @@ services:
       context: ../CC-Forum-backend
       dockerfile: Dockerfile
     container_name: campus-connect-forum
+    env_file:
+      - ../CC-Forum-backend/.env
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - JWT_SECRET_KEY=secret_key_for_authentication_service
       - AUTH_GRPC_SERVER=auth-server:50053
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:///forum.db
-      - UPLOAD_FOLDER=/app/uploads
-      - AWS_ACCESS_KEY_ID=forum_aws_access_key
-      - AWS_SECRET_ACCESS_KEY=forum_aws_secret_key
-      - AWS_BUCKET_NAME=campus-connect-forum
-      - AWS_REGION=ap-south-1
     ports:
-      - "5000:5000"
+      - "3000:3000"
     networks:
       - campus-connect-network
     restart: unless-stopped
@@ -82,21 +73,16 @@ services:
       context: ../CC-Grievance-backend
       dockerfile: Dockerfile
     container_name: campus-connect-grievance
+    env_file:
+      - ../CC-Grievance-backend/.env
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - JWT_SECRET_KEY=secret_key_for_authentication_service
       - AUTH_GRPC_SERVER=auth-server:50053
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:///grievance.db
-      - UPLOAD_FOLDER=/app/uploads
-      - OPENAI_API_KEY=sk-openai-key-for-grievance-service
-      - AWS_ACCESS_KEY_ID=grievance_aws_access_key
-      - AWS_SECRET_ACCESS_KEY=grievance_aws_secret_key
-      - AWS_BUCKET_NAME=campus-connect-grievance
-      - AWS_REGION=ap-south-1
     ports:
-      - "7000:7000"
+      - "4000:4000"
     networks:
       - campus-connect-network
     restart: unless-stopped
@@ -110,20 +96,16 @@ services:
       context: ../CC-LMS-backend
       dockerfile: Dockerfile
     container_name: campus-connect-lms
+    env_file:
+      - ../CC-LMS-backend/.env
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - JWT_SECRET_KEY=secret_key_for_authentication_service
       - AUTH_GRPC_SERVER=auth-server:50053
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:///lms.db
-      - UPLOAD_FOLDER=/app/uploads
-      - AWS_ACCESS_KEY_ID=lms_aws_access_key
-      - AWS_SECRET_ACCESS_KEY=lms_aws_secret_key
-      - AWS_BUCKET_NAME=campus-connect-lms
-      - AWS_REGION=ap-south-1
     ports:
-      - "9000:9000"
+      - "5000:5000"
     networks:
       - campus-connect-network
     restart: unless-stopped
@@ -137,16 +119,17 @@ services:
       context: ../CC-Teacher-backend
       dockerfile: Dockerfile
     container_name: campus-connect-teacher
+    env_file:
+      - ../CC-Teacher-backend/.env
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - JWT_SECRET_KEY=secret_key_for_authentication_service
       - AUTH_GRPC_SERVER=auth-server:50053
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=sqlite:///teacher.db
-      - UPLOAD_FOLDER=/app/uploads
+      - PORT=8000
     ports:
-      - "4000:4000"
+      - "8000:8000"
     networks:
       - campus-connect-network
     restart: unless-stopped
