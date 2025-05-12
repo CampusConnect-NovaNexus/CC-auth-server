@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction, RequestHandler } from 'express';
+import express, { Request, Response, NextFunction, RequestHandler, Router } from 'express';
 import { 
   registerDevice, 
   updateDeviceToken, 
@@ -8,6 +8,7 @@ import {
   sendNotificationByFilter 
 } from '../services/notificationService';
 import { isValidToken, verifyJWT } from '../lib/jwt';
+import { sendWarningEmail } from '../lib/email';
 
 console.log('🔔 Notification routes module loaded');
 const router = express.Router();
@@ -27,6 +28,27 @@ const asyncHandler = (fn: (req: AuthenticatedRequest, res: Response) => Promise<
       .catch(next);
   };
 };
+
+router.post('/email', async (req: Request, res: Response)=>{
+  const body = req.body; 
+  const to = body.to; 
+  const senderName = body.senderName;
+  const studentName = body.studentName; 
+  const attendancePercentage = body.attendancePercentage; 
+  try {
+      const result = sendWarningEmail(senderName, to, studentName, attendancePercentage);
+
+      if (!result) {
+        console.log('Error sending verification mail: ', result);
+        return res.status(500).json({ error: 'Failed to send verification email' });
+      }
+
+      return res.status(200).json({ message: 'Verification email sent', result});
+    } catch (error) {
+      console.error('Error sending email:', error);
+      return res.status(400).json({ error: 'Failed to send verification email' });
+    }
+})
 
 /**
  * Register a device for push notifications
