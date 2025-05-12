@@ -11,7 +11,7 @@ import { isValidToken, verifyJWT } from '../lib/jwt';
 import { sendWarningEmail } from '../lib/email';
 
 console.log('🔔 Notification routes module loaded');
-const router = express.Router();
+const router:Router = express.Router();
 
 // Define custom interface to extend Express Request type
 interface AuthenticatedRequest extends Request {
@@ -29,7 +29,7 @@ const asyncHandler = (fn: (req: AuthenticatedRequest, res: Response) => Promise<
   };
 };
 
-router.post('/email', async (req: Request, res: Response)=>{
+router.post('/email', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const body = req.body; 
   const to = body.to; 
   const senderName = body.senderName;
@@ -48,7 +48,7 @@ router.post('/email', async (req: Request, res: Response)=>{
       console.error('Error sending email:', error);
       return res.status(400).json({ error: 'Failed to send verification email' });
     }
-})
+}));
 
 /**
  * Register a device for push notifications

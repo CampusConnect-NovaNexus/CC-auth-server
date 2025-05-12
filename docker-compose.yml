@@ -1,0 +1,184 @@
+services:
+  # Authentication Service
+  auth-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: campus-connect-auth
+    environment:
+      - GRPC_HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://auth_owner:npg_OqkPZFRSY86V@ep-frosty-paper-a1ofus82-pooler.ap-southeast-1.aws.neon.tech/auth?sslmode=require
+      - JWT_SECRET=secret_key_for_authentication_service
+      - PORT=3500
+      - GRPC_PORT=50053
+      - RESEND_API_KEY=re_bQavPbdj_Fhnyvze8eWcMLhrsLgV3aC8s
+      - GOOGLE_CLIENT_ID=171839534985-b205gpvt4putto5r7ubfl5r1lp0gaugj.apps.googleusercontent.com
+    ports:
+      - "3500:3500"
+      - "50053:50053"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+
+
+  # Lost and Found Service
+  lostfound-service:
+    build:
+      context: ../CC-lost-found-backend
+      dockerfile: Dockerfile
+    container_name: campus-connect-lostfound
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+      - GRPC_SERVER=0.0.0.0:50052
+      - JWT_SECRET_KEY=secret_key_for_authentication_service
+      - AUTH_GRPC_SERVER=auth-server:50053
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///lostfound.db
+      - UPLOAD_FOLDER=/app/uploads
+    ports:
+      - "6000:6000"
+      - "50052:50052"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+      
+  # Forum Service
+  forum-service:
+    build:
+      context: ../CC-Forum-backend
+      dockerfile: Dockerfile
+    container_name: campus-connect-forum
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=secret_key_for_authentication_service
+      - AUTH_GRPC_SERVER=auth-server:50053
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///forum.db
+      - UPLOAD_FOLDER=/app/uploads
+      - AWS_ACCESS_KEY_ID=forum_aws_access_key
+      - AWS_SECRET_ACCESS_KEY=forum_aws_secret_key
+      - AWS_BUCKET_NAME=campus-connect-forum
+      - AWS_REGION=ap-south-1
+    ports:
+      - "5000:5000"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - auth-server
+      
+  # Grievance Service
+  grievance-service:
+    build:
+      context: ../CC-Grievance-backend
+      dockerfile: Dockerfile
+    container_name: campus-connect-grievance
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=secret_key_for_authentication_service
+      - AUTH_GRPC_SERVER=auth-server:50053
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///grievance.db
+      - UPLOAD_FOLDER=/app/uploads
+      - OPENAI_API_KEY=sk-openai-key-for-grievance-service
+      - AWS_ACCESS_KEY_ID=grievance_aws_access_key
+      - AWS_SECRET_ACCESS_KEY=grievance_aws_secret_key
+      - AWS_BUCKET_NAME=campus-connect-grievance
+      - AWS_REGION=ap-south-1
+    ports:
+      - "7000:7000"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - auth-server
+      
+  # LMS Service
+  lms-service:
+    build:
+      context: ../CC-LMS-backend
+      dockerfile: Dockerfile
+    container_name: campus-connect-lms
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=secret_key_for_authentication_service
+      - AUTH_GRPC_SERVER=auth-server:50053
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///lms.db
+      - UPLOAD_FOLDER=/app/uploads
+      - AWS_ACCESS_KEY_ID=lms_aws_access_key
+      - AWS_SECRET_ACCESS_KEY=lms_aws_secret_key
+      - AWS_BUCKET_NAME=campus-connect-lms
+      - AWS_REGION=ap-south-1
+    ports:
+      - "9000:9000"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - auth-server
+      
+  # Teacher Service
+  teacher-service:
+    build:
+      context: ../CC-Teacher-backend
+      dockerfile: Dockerfile
+    container_name: campus-connect-teacher
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=secret_key_for_authentication_service
+      - AUTH_GRPC_SERVER=auth-server:50053
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///teacher.db
+      - UPLOAD_FOLDER=/app/uploads
+    ports:
+      - "4000:4000"
+    networks:
+      - campus-connect-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - auth-server
+
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: campus-connect-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - campus-connect-network
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  campus-connect-network:
+    driver: bridge
+
+volumes:
+  redis-data:

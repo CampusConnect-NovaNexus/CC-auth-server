@@ -18,4 +18,5 @@ RUN npm run build
 EXPOSE 3500 50053
 
 # Use wait-for-it script to wait for Redis before starting
-CMD ["/bin/bash", "-c", "wait-for-it.sh redis:6379 -t 60 -- npm run start:all"]
+# CMD ["/bin/bash", "-c", "wait-for-it.sh redis:6379 -t 60 -- npm run start:all"]
+CMD ["npm", "run", "start:all"]
