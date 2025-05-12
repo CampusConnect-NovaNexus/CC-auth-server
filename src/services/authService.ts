@@ -52,6 +52,12 @@ export const register = async (req: Request, res: Response):Promise<any> => {
     return res.status(400).json({ error: 'Invalid data' });
   }
 
+  const { email } = parsedBody.data; 
+
+  if (!email.endsWith('@nitm.ac.in')) {
+    return res.status(400).json({ error: 'Use Institute Email' });
+  }
+
   const hashedPassword = await hashPassword(parsedBody.data.password);
 
   try {
