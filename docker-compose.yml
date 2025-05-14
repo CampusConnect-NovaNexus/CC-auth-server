@@ -15,6 +15,12 @@ services:
     networks:
       - campus-connect-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 100M
 
   # Lost and Found Service
   lostfound-service:
@@ -35,6 +41,12 @@ services:
     networks:
       - campus-connect-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 120M
+        reservations:
+          memory: 80M
       
   # Forum Service
   forum-service:
@@ -56,6 +68,12 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-server
+    deploy:
+      resources:
+        limits:
+          memory: 120M
+        reservations:
+          memory: 80M
       
   # Grievance Service
   grievance-service:
@@ -77,6 +95,12 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-server
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 70M
       
   # LMS Service
   lms-service:
@@ -98,6 +122,12 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-server
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 70M
       
   # Teacher Service
   teacher-service:
@@ -120,6 +150,12 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-server
+    deploy:
+      resources:
+        limits:
+          memory: 90M
+        reservations:
+          memory: 60M
 
 networks:
   campus-connect-network:
